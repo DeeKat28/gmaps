@@ -1,5 +1,11 @@
-import { User } from "./User";
-import { Company } from "./Company";
+// Tells other classes how to be able to add markers
+export interface Mappable {
+  location: {
+    lat: number;
+    long: number;
+  };
+  showContent(): string;
+}
 
 export class CustomMap {
   googleMap: google.maps.Map;
@@ -17,13 +23,21 @@ export class CustomMap {
     );
   }
 
-  addUserMarker(user: User): void {
-    new google.maps.Marker({
+  addMarker(mappable: Mappable): void {
+    const marker = new google.maps.Marker({
       map: this.googleMap,
       position: {
-        lat: user.location.lat,
-        lng: user.location.long,
+        lat: mappable.location.lat,
+        lng: mappable.location.long,
       },
+    });
+
+    marker.addListener("click", () => {
+      const infoWindow = new google.maps.InfoWindow({
+        content: mappable.showContent(),
+      });
+
+      infoWindow.open(this.googleMap, marker);
     });
   }
 }
